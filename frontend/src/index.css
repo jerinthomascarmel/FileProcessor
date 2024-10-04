@@ -1,0 +1,20 @@
+
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  background-color: white;
+  color: black;
+  font-family: "Fira Sans", sans-serif;
+}
+
+
+.customNavBar{
+  width: 100vw;
+  display: flex;
+  height: 15vh;
+  position: relative;
+  align-items: center;
+}
