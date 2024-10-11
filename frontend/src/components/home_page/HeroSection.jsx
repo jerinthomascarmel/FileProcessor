@@ -12,7 +12,7 @@ function HeroSection() {
             animationData={FileUploadAnimation}
             style={{ height: "25rem" }}
           />
-        </div>
+        </div>  
         <div className="col-lg-1 d-none d-lg-block"></div>
         <div className="col-lg-6 col-12 mt-3">
           <FormBox />

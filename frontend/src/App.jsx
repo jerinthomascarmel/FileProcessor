@@ -8,7 +8,18 @@ import AuthProvider from "react-auth-kit";
 import RequireAuth from "@auth-kit/react-router/RequireAuth";
 import createStore from "react-auth-kit/createStore";
 
+import { useEffect } from "react";
+import Particles from "particlesjs";
 function App() {
+  useEffect(() => {
+    window.onload = function () {
+      Particles.init({
+        selector: ".background",
+        connectParticles: true,
+        color: "#d0d3d4",
+      });
+    };
+  }, []);
   const store = createStore({
     authName: "_auth",
     authType: "cookie",
@@ -34,6 +45,7 @@ function App() {
             <Route path="/login" element={<LoginSection />} />
             <Route path="/*" element={<ErrorSection />} />
           </Routes>
+          <canvas className="background" style={{ zIndex: "-1" }}></canvas>
         </BrowserRouter>
       </AuthProvider>
     </>

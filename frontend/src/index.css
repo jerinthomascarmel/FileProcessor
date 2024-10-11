@@ -2,16 +2,25 @@
   :root {
     line-height: 1.5;
     font-weight: 400;
+    
   }
-  
 
   body {
+    margin: 0; 
+    padding: 0;
     background-color: white;
     color: black;
     font-family: "Fira Sans", sans-serif;
   } 
 
-  /* animation: fromLeftAnimation 2s ease-in-out 0s 1;  */
+  .background {
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
 
   .customNavBar{
     width: 100vw;
@@ -88,4 +97,16 @@
   #lottie-animation{
     animation: fromRightAnimation 1.5s ease-in-out forwards;
   }
+
+
+input[type="file"]::file-selector-button {
+  margin-right: 20px !important;
+  border: none !important;
+  background: #20658e !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+
+}
 

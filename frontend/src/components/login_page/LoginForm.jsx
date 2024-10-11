@@ -54,7 +54,7 @@ function LoginForm() {
     <div className="container parent-form">
       <h3 className="login-text">Login now</h3>
       <form onSubmit={handleSubmit} className="form-container">
-        <div className="mb-1">
+        <div className="mb-1 mt-3">
           <label htmlFor="username" className="form-label fw-bolder">
             Username
           </label>

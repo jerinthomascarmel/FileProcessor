@@ -7,7 +7,11 @@ function LoginSection() {
     <div className="container p-5 mt-5">
       <div className="row">
         <div className="col-lg-7 col-12">
-          <Lottie animationData={UserAnimation} style={{ height: "25rem" }} id='lottie-animation'/>
+          <Lottie
+            animationData={UserAnimation}
+            style={{ height: "25rem" }}
+            id="lottie-animation"
+          />
         </div>
         <div className="col-lg-4 col-12 mt-5">
           <LoginForm />

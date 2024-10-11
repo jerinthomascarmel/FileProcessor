@@ -116,7 +116,7 @@ function FormBox() {
       onSubmit={handleSubmit}
     >
       <h3 className="processfile-text">Process Files Now!</h3>
-      <div className="mb-3">
+      <div className="mb-3 mt-3">
         <label htmlFor="formFile" className="form-label fw-bolder">
           Upload Excel File
         </label>
@@ -124,9 +124,7 @@ function FormBox() {
           className="form-control
                form-control-file
                cursor-pointer 
-               bg-gradient-info
-               border border-secondary
-               rounded-lg"
+               bg-light"
           id="formFile"
           type="file"
           accept=".xlsx"
@@ -142,9 +140,7 @@ function FormBox() {
           className="form-control
                form-control-file
                cursor-pointer 
-               bg-gradient-info
-               border border-secondary
-               rounded-lg"
+               bg-light"
           id="formFile"
           type="file"
           accept=".doc,.docx"
@@ -180,7 +176,10 @@ function FormBox() {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ backgroundColor: "#20658e", width: "100%" }}
+            style={{
+              backgroundColor: "#20658e",
+              width: "100%",
+            }}
             disabled={loading}
           >
             {loading ? "Processing.." : "Start Processing"}
