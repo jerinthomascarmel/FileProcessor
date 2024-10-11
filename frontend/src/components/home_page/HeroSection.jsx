@@ -8,6 +8,7 @@ function HeroSection() {
       <div className="row">
         <div className="col-lg-5 col-12">
           <Lottie
+            id="lottie-animation"
             animationData={FileUploadAnimation}
             style={{ height: "25rem" }}
           />

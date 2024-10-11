@@ -112,31 +112,41 @@ function FormBox() {
 
   return (
     <form
-      className="container needs-validation border p-5 rounded  border-secondary-subtle"
+      className="container needs-validation  p-5 form-container"
       onSubmit={handleSubmit}
     >
-      <h3>Process Files Now!</h3>
+      <h3 className="processfile-text">Process Files Now!</h3>
       <div className="mb-3">
-        <label htmlFor="formFile" className="form-label">
+        <label htmlFor="formFile" className="form-label fw-bolder">
           Upload Excel File
         </label>
         <input
-          className="form-control border border-black"
-          type="file"
+          className="form-control
+               form-control-file
+               cursor-pointer 
+               bg-gradient-info
+               border border-secondary
+               rounded-lg"
           id="formFile"
+          type="file"
           accept=".xlsx"
           onChange={handleExcelFileChange}
           required
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="formFile" className="form-label">
+        <label htmlFor="formFile" className="form-label fw-bolder">
           Upload Word File
         </label>
         <input
-          className="form-control border border-black"
-          type="file"
+          className="form-control
+               form-control-file
+               cursor-pointer 
+               bg-gradient-info
+               border border-secondary
+               rounded-lg"
           id="formFile"
+          type="file"
           accept=".doc,.docx"
           onChange={handleWordFileChange}
           required
@@ -170,7 +180,7 @@ function FormBox() {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ backgroundColor: "#a074f4", width: "100%" }}
+            style={{ backgroundColor: "#20658e", width: "100%" }}
             disabled={loading}
           >
             {loading ? "Processing.." : "Start Processing"}

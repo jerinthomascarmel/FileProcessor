@@ -51,44 +51,51 @@ function LoginForm() {
     }
   };
   return (
-    <div className="container">
-      <h3>Login now</h3>
-      <form onSubmit={handleSubmit}>
+    <div className="container parent-form">
+      <h3 className="login-text">Login now</h3>
+      <form onSubmit={handleSubmit} className="form-container">
         <div className="mb-1">
-          <label htmlFor="username" className="form-label">
+          <label htmlFor="username" className="form-label fw-bolder">
             Username
           </label>
           <input
             type="username"
-            className="form-control"
+            className="form-control rounded-lg"
             id="username"
+            placeholder="Enter your username"
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
         <div className="mb-1">
-          <label htmlFor="password" className="form-label">
+          <label htmlFor="password" className="form-label fw-bolder">
             Password
           </label>
           <input
             type="password"
-            className="form-control"
+            className="form-control rounded-lg"
+            placeholder="Enter your password"
             id="password"
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <button
-          className="btn pl-2 pr-2 fs-5 text-white mt-2 mb-2"
-          style={{
-            width: "40%",
-            margin: "0 auto",
-            backgroundColor: "#a074f4",
-          }}
-          disabled={loading}
-        >
-          {loading ? "loading..." : "Login"}
-        </button>
+        <div className="row">
+          <div className="col-7"></div>
+          <div className="col-5">
+            <button
+              className="btn pl-2 pr-2 fs-5 text-white mt-2 mb-2"
+              style={{
+                width: "100%",
+                margin: "0 auto",
+                backgroundColor: "#20658e",
+              }}
+              disabled={loading}
+            >
+              {loading ? "loading..." : "Login"}
+            </button>
+          </div>
+        </div>
         {error && <Alert variant="danger">{error}</Alert>}
       </form>
     </div>

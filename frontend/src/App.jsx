@@ -21,6 +21,7 @@ function App() {
         <BrowserRouter>
           <CustomNavBar />
           <Routes>
+            <Route path="/" element={<HeroSection />} />
             <Route
               path={"/"}
               element={
@@ -29,6 +30,7 @@ function App() {
                 </RequireAuth>
               }
             />
+
             <Route path="/login" element={<LoginSection />} />
             <Route path="/*" element={<ErrorSection />} />
           </Routes>
