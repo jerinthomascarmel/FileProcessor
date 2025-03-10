@@ -90,13 +90,21 @@ content %}
                   >
                 </div>
 
-                <!-- Login Button -->
+                <!-- Login/Logout Button -->
                 <div class="hidden md:block">
-                  <a
-                    href="/login"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300"
-                    >Login</a
-                  >
+                  {% if request.cookies.get('access_token_cookie') %}
+                    <a
+                      href="/logout"
+                      class="bg-red-600 text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors duration-300"
+                      >Logout</a
+                    >
+                  {% else %}
+                    <a
+                      href="/login"
+                      class="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300"
+                      >Login</a
+                    >
+                  {% endif %}
                 </div>
 
                 <!-- Mobile menu button -->
@@ -165,11 +173,19 @@ content %}
                     class="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-300"
                     >Contact</a
                   >
-                  <a
-                    href="/login"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300 inline-block w-24 text-center mt-2"
-                    >Login</a
-                  >
+                  {% if request.cookies.get('access_token_cookie') %}
+                    <a
+                      href="/logout"
+                      class="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 transition-colors duration-300 inline-block w-24 text-center mt-2"
+                      >Logout</a
+                    >
+                  {% else %}
+                    <a
+                      href="/login"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors duration-300 inline-block w-24 text-center mt-2"
+                      >Login</a
+                    >
+                  {% endif %}
                 </div>
               </div>
             </nav>
