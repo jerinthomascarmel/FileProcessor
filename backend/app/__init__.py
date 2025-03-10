@@ -1,13 +1,13 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager  # Import JWTManager
-from .routes.upload import upload_files  # Import your upload route
-from .routes.home import home  # Import your home route
-from .routes.login import login  # Import your login route
+from flask_jwt_extended import JWTManager  
+from .routes.upload import upload_files  
+from .routes.home import home  
+from .routes.login import login  
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)  # Enable CORS for all routes
+    CORS(app)  
     
     # Configure your JWT secret key
     app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Change to a secure key
