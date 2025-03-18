@@ -1,11 +1,18 @@
-from flask import request, jsonify, send_file
+from flask import request, jsonify, send_file, redirect, url_for
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
 from ..openai_processing import extract_content, identify_requirements, apply_wrap_text, identify_page_limits, break_text_into_lines
+from flask_jwt_extended import verify_jwt_in_request
 
 
-def upload_files():
+def upload_phase1():
+    try:
+        verify_jwt_in_request()
+    except:
+        print("User is not authenticated")
+        return redirect(url_for('login'))
+    
     # Expecting a .zip file
     zip_file = request.files.get('zip_file')
 
@@ -44,15 +51,18 @@ def upload_files():
 
             for header, data in sections.items():
                 content = data['content']
-                page_limit = data.get('page_limit', 'Not specified')  # Default if no page limit specified
+                # Default if no page limit specified
+                page_limit = data.get('page_limit', 'Not specified')
 
                 # Use OpenAI to identify requirements for the given header and content
                 requirements = identify_requirements(header, content)
-                detected_page_limit = identify_page_limits(content)  # Assume content is string; adjust if otherwise
+                # Assume content is string; adjust if otherwise
+                detected_page_limit = identify_page_limits(content)
 
                 # Write data to Excel using text breaking and applying wrap text
                 ws[f"A{row_num}"].value = break_text_into_lines(header, 50)
-                ws[f"B{row_num}"].value = break_text_into_lines(requirements, 50)
+                ws[f"B{row_num}"].value = break_text_into_lines(
+                    requirements, 50)
                 ws[f"C{row_num}"].value = page_limit if page_limit else detected_page_limit
 
                 apply_wrap_text(ws[f"A{row_num}"])
@@ -64,7 +74,8 @@ def upload_files():
             # Create an in-memory buffer to store the modified Excel file
             excel_output = io.BytesIO()
             wb.save(excel_output)
-            excel_output.seek(0)  # Reset the pointer to the start of the buffer
+            # Reset the pointer to the start of the buffer
+            excel_output.seek(0)
 
             # Create an in-memory zip archive and add the processed Excel file to it
             zip_output = io.BytesIO()

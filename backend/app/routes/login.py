@@ -1,35 +1,31 @@
-from flask import request, jsonify
+from flask import request, render_template, redirect, url_for, flash
 from flask_jwt_extended import create_access_token
 from ..user_data import users  # Import the users list
 
+
 def login():
-    try:
-        # Parse the incoming JSON request for username and password
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
         if not username or not password:
-            return jsonify({"error": "Username and password are required"}), 400
-        
-        user = None   
+            flash('Username and password are required')
+            return redirect(url_for('login'))
+
+        user = None
         for userModel in users:
             if userModel['username'] == username:
                 user = userModel
-        
-        if not user:
-            return jsonify({"error": "Authentication failed"}), 401
 
-        # Check if the password matches (without hashing)
-        if password != user['password']:
-            return jsonify({"error": "Authentication failed"}), 401
+        if not user or password != user['password']:
+            flash('Invalid credentials')
+            return redirect(url_for('login'))
 
-        # Create a JWT token for the user
-        token = create_access_token(identity=user['username'])  # Use the username as the identity
-
-        # Return the JWT token
-        return jsonify({"token": token}), 200
-
-    except Exception as e:
-        print(f'{str(e)}')
-        return jsonify({"error": "Login failed"}), 500
+        # Create JWT token and set in cookie
+        token = create_access_token(identity=username)
+        response = redirect(url_for('home'))
+        response.set_cookie('access_token_cookie', token)
+        return response
