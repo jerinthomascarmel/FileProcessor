@@ -2,8 +2,7 @@ from flask import request, jsonify, send_file, redirect, url_for
 from flask_jwt_extended import verify_jwt_in_request
 import io
 import zipfile
-from openpyxl.reader.excel import load_workbook
-from ..openai_processing import extract_content, identify_requirements, apply_wrap_text, identify_page_limits, break_text_into_lines
+
 
 
 def upload_phase2():
@@ -23,7 +22,7 @@ def upload_phase2():
         return jsonify({'error': 'Missing zip file!'}), 400
 
     try:
-        import time
+        import time 
         print('before time delay')
         # Simulate a delay of 2 minutes
         time.sleep(120)

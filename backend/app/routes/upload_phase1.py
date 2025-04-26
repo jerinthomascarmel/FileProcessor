@@ -2,7 +2,7 @@ from flask import request, jsonify, send_file, redirect, url_for
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
-from ..openai_processing import extract_content, identify_requirements, apply_wrap_text, identify_page_limits, break_text_into_lines
+from ..openai_processing import extract_content_with_openai, apply_wrap_text, break_text_into_lines
 from flask_jwt_extended import verify_jwt_in_request
 
 
@@ -38,38 +38,52 @@ def upload_phase1():
             # Check if both files were found
             if not word_file or not excel_file:
                 return jsonify({'error': 'Both Word and Excel files are required inside the zip.'}), 400
-
+            
+            sections = extract_content_with_openai(word_file)
+            
             # Load the Excel file
             wb = load_workbook(excel_file)
             ws = wb.active
 
-            # Assume headers are already in the Excel template
-            row_num = 2  # Start writing data from the second row
+            # Headers
+            ws["A1"] = "Header"
+            ws["B1"] = "Subheader"
+            ws["C1"] = "Requirements"
+            ws["D1"] = "Page Limit"
+            for cell in ["A1", "B1", "C1", "D1"]:
+                apply_wrap_text(ws[cell])
 
-            # Extract content from the Word document using your extraction function
-            sections = extract_content(word_file)
+            row_num = 2
 
-            for header, data in sections.items():
-                content = data['content']
-                # Default if no page limit specified
-                page_limit = data.get('page_limit', 'Not specified')
+            for item in sections:
+                header = item.get("header", "")
+                subheader = item.get("subheader", "")
+                requirements = "\n".join(item.get("requirements", []))
+                page_limit = item.get("page_limit", "0")
 
-                # Use OpenAI to identify requirements for the given header and content
-                requirements = identify_requirements(header, content)
-                # Assume content is string; adjust if otherwise
-                detected_page_limit = identify_page_limits(content)
+                # Column A - Header
+                cell = ws[f"A{row_num}"]
+                cell.value = break_text_into_lines(header)
+                apply_wrap_text(cell)
 
-                # Write data to Excel using text breaking and applying wrap text
-                ws[f"A{row_num}"].value = break_text_into_lines(header, 50)
-                ws[f"B{row_num}"].value = break_text_into_lines(
-                    requirements, 50)
-                ws[f"C{row_num}"].value = page_limit if page_limit else detected_page_limit
+                # Column B - Subheader
+                cell = ws[f"B{row_num}"]
+                cell.value = break_text_into_lines(subheader or "N/A")
+                apply_wrap_text(cell)
 
-                apply_wrap_text(ws[f"A{row_num}"])
-                apply_wrap_text(ws[f"B{row_num}"])
-                apply_wrap_text(ws[f"C{row_num}"])
+                # Column C - Requirements
+                cell = ws[f"C{row_num}"]
+                cell.value = break_text_into_lines(requirements)
+                apply_wrap_text(cell)
+
+                # Column D - Page Limit
+                cell = ws[f"D{row_num}"]
+                cell.value = page_limit
+                apply_wrap_text(cell)
 
                 row_num += 1
+
+        
 
             # Create an in-memory buffer to store the modified Excel file
             excel_output = io.BytesIO()

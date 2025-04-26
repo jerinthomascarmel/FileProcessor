@@ -1,3 +1,6 @@
+
+import json
+import re
 import os
 import openai
 from docx import Document
@@ -9,117 +12,106 @@ from dotenv import load_dotenv
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 client = openai.OpenAI()
-# Function to extract content from Word document
 
-def extract_content(docx_file):
+# Function: Read full document text
+def extract_content_with_openai(docx_file):
     doc = Document(docx_file)
-    extracted_text = {}
-    current_section = None
+    full_text = "\n".join([para.text.strip()
+                          for para in doc.paragraphs if para.text.strip()])
 
-    for para in doc.paragraphs:
-        text = para.text.strip()
-        if text:
-            if is_header(text):  # Define a way to detect headers
-                current_section = text
-                extracted_text[current_section] = {
-                    'content': [], 'page_limit': None}
-            elif 'Page Limit:' in text:  # Assuming a pattern for page limits
-                page_limit = text.split('Page Limit:')[1].strip()
-                if current_section:
-                    extracted_text[current_section]['page_limit'] = page_limit
-            elif current_section:
-                extracted_text[current_section]['content'].append(text)
-    return extracted_text
+    print("🧠 Processing document with OpenAI...")
 
-# Function to identify headers and subheaders using OpenAI API
-
-
-def identify_headers(text):
     prompt = f"""
-    For each line of the provided text, determine whether it is a 'Main Header' or 'Subheader'.
-    If the text is a main header, label it as 'Main Header: {text}'.
-    If the text is a subheader, label it as 'Subheader: {text}'.
+You are given the full text of a Word document. Act as a senior bidding tender document analyst and your task is to extract the structure into a JSON array where each item contains:
 
-    Apply this to the following text:
-    {text}
-    """
+- header (main section heading), Please keep the numbering etc shown in the document.
+- subheader (if applicable), please keep the numbering etc shown in the document.
+- requirements (list of extracted requirements under the section or subheader), it should not be rephrase or reworded, it should just be the same from the document to avoid confusions. Also keep the numbering etc same.
+- page_limit (if mentioned in the text, otherwise 0)
 
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        model="gpt-4o-mini",  # Or "gpt-4" if you have access
-    )
+Return only **valid JSON** in this format:
 
-    headers = response.choices[0].message.content.strip()
-    return headers
+[
+  {{
+    "header": "Header Title",
+    "subheader": "Subsection Title or null",
+   "requirements": [
+      "1) Requirement one",
+      "2) Requirement two",
+      "(a) Sub requirement",
+      "(b) Another sub requirement"
+    ],
+    "page_limit": "2"
+  }},
+  ...
+]
 
-# Function to check if a paragraph is a header or subheader
+[
+  {{
+    "header": "Appendix A – Tender Submission Requirements",
+    "subheader": "Annexure 1",
+    "requirements": [
+      "1) Requirement one",
+      "2) Requirement two",
+      "(a) Sub requirement",
+      "(b) Another sub requirement"
+    ],
+    "page_limit": "0"
+  }}
+]
+
+RULES:
+- Preserve exact numbering and lettering (like "1)", "(a)", etc.)
+- Keep the original punctuation and structure from the document
+- Only respond with a **valid JSON array**
+- Do NOT include any commentary, markdown, or natural language outside the JSON
+
+Here is the document content:
+
+{full_text}
+"""
+
+    try:
+        response = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="gpt-4o-mini",
+        )
+
+        raw_content = response.choices[0].message.content.strip()
+        # Truncate for display
+        print("🔎 Raw GPT response:\n", raw_content[:1000])
+
+        if raw_content.startswith("```json"):
+            raw_content = raw_content[7:]
+        if raw_content.endswith("```"):
+            raw_content = raw_content[:-3]
+
+        structured_data = json.loads(raw_content)
+        return structured_data
+
+    except Exception as e:
+        print("❌ Error parsing GPT response:", str(e))
+        return []
 
 
-def is_header(text):
-    # Simple heuristic for headers (can be expanded)
-    return text.isupper() or text.endswith(':') or len(text.split()) < 5
-
-# Function to identify requirements using OpenAI API
-
-
-def identify_requirements(header, paragraphs):
-    combined_paragraphs = "\n".join(paragraphs)
-    prompt = f"Identify the requirements from the following section under the header '{header}':\n\n{combined_paragraphs}\n\nReturn the requirements in a list format.If no text is provided just return blank or empty space."
-
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        model="gpt-4o-mini",  # Or "gpt-4" if you have access
-    )
-
-    page_limits = response.choices[0].message.content.strip()
-    return page_limits
-
-# Function to detect page limits using OpenAI API
-
-
-def identify_page_limits(text):
-    prompt = f"Identify any page limits mentioned in the following text. Return the page limits if specified:\n\n{text}. If the text passed is null or nothing can be found, just say 0."
-
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        model="gpt-4o-mini",  # Or "gpt-4" if you have access
-    )
-
-    page_limits = response.choices[0].message.content.strip()
-    return page_limits
-
-# Function to break text into lines if it exceeds the character limit
+# Function: Excel formatting
+def apply_wrap_text(cell):
+    cell.alignment = Alignment(wrap_text=True)
 
 
 def break_text_into_lines(text, max_characters=50):
     words = text.split(' ')
     lines = []
     current_line = []
-
     for word in words:
-        # If adding the next word would exceed the max character limit, start a new line
         if len(' '.join(current_line + [word])) > max_characters:
             lines.append(' '.join(current_line))
             current_line = [word]
         else:
             current_line.append(word)
-
-    # Add the last line
     if current_line:
         lines.append(' '.join(current_line))
-
-    # Join lines with a newline character to create the multi-line string
     return '\n'.join(lines)
 
-# Function to apply wrap text in Excel cells
-
-
-def apply_wrap_text(cell):
-    cell.alignment = Alignment(wrap_text=True)
