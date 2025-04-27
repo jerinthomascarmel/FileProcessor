@@ -1,8 +1,8 @@
 from flask import Flask, render_template
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager  # Import JWTManager
-from .routes.upload_phase2 import upload_phase2  
-from .routes.upload_phase1 import upload_phase1
+from .routes.upload_phase2 import upload_phase2
+from .routes.upload_phase1 import upload_phase1, progress
 from .routes.home import home  # Import your home route
 from .routes.login import login  # Import your login route
 from .routes.logout import logout  # Import your logout route
@@ -32,5 +32,6 @@ def create_app():
     app.add_url_rule('/login', view_func=login,
                      methods=['GET', 'POST'])  # Add the login route
     app.add_url_rule('/logout', view_func=logout)  # Add the logout route
+    app.add_url_rule('/progress/<upload_id>', view_func=progress)
 
     return app

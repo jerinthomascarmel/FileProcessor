@@ -1,9 +1,11 @@
-from flask import request, jsonify, send_file, redirect, url_for
+from flask import request, jsonify, send_file, redirect, url_for, Response
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
 from ..openai_processing import extract_content_with_openai, apply_wrap_text, break_text_into_lines
 from flask_jwt_extended import verify_jwt_in_request
+
+progressbars = {}
 
 
 def upload_phase1():
@@ -12,9 +14,10 @@ def upload_phase1():
     except:
         print("User is not authenticated")
         return redirect(url_for('login'))
-    
+
     # Expecting a .zip file
     zip_file = request.files.get('zip_file')
+    upload_id = request.form['upload_id']
 
     if not zip_file:
         return jsonify({'error': 'Missing zip file!'}), 400
@@ -38,9 +41,12 @@ def upload_phase1():
             # Check if both files were found
             if not word_file or not excel_file:
                 return jsonify({'error': 'Both Word and Excel files are required inside the zip.'}), 400
-            
+
+            # print('files recieved !')
+            progressbars[upload_id] = 10
+
             sections = extract_content_with_openai(word_file)
-            
+
             # Load the Excel file
             wb = load_workbook(excel_file)
             ws = wb.active
@@ -83,8 +89,8 @@ def upload_phase1():
 
                 row_num += 1
 
-        
-
+            # print('files recieved !')
+            progressbars[upload_id] = 60
             # Create an in-memory buffer to store the modified Excel file
             excel_output = io.BytesIO()
             wb.save(excel_output)
@@ -98,6 +104,8 @@ def upload_phase1():
 
             zip_output.seek(0)  # Reset the pointer to the start of the buffer
 
+            # print('completed !')
+            progressbars[upload_id] = 100
             # Send the zip file back to the client
             return send_file(
                 zip_output,
@@ -109,3 +117,18 @@ def upload_phase1():
     except Exception as e:
         print(e)
         return jsonify({'error': f'An error occurred during processing: {str(e)}'}), 500
+
+
+def progress(upload_id):
+    def generate():
+        previous_percentage = progressbars.get(upload_id, 0)
+        while True:
+            percentage = progressbars.get(upload_id, 0)
+            if percentage != previous_percentage:
+                yield f"data: {percentage}\n\n"
+                previous_percentage = percentage
+            elif percentage == 100:
+                yield f"data:{percentage}\n\n"
+                break
+
+    return Response(generate(), mimetype='text/event-stream')
