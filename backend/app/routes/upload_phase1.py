@@ -2,9 +2,10 @@ from flask import request, jsonify, send_file, redirect, url_for, Response
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
-from ..openai_processing import extract_content_with_openai, apply_wrap_text, break_text_into_lines
+from ..openai_processing import extract_content_with_openai, add_excel_with_sections, extract_tables_from_docx, add_excel_with_tables
 from flask_jwt_extended import verify_jwt_in_request
-
+import os
+import tempfile
 progressbars = {}
 
 
@@ -42,77 +43,58 @@ def upload_phase1():
             if not word_file or not excel_file:
                 return jsonify({'error': 'Both Word and Excel files are required inside the zip.'}), 400
 
-            # print('files recieved !')
+            print('files recieved !')
             progressbars[upload_id] = 10
 
-            sections = extract_content_with_openai(word_file)
+            excel_path = None
+            try:
+                # Create a temporary file
+                with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+                    tmp.write(excel_file.read())
+                    excel_path = tmp.name
 
-            # Load the Excel file
-            wb = load_workbook(excel_file)
-            ws = wb.active
+                # sections = extract_content_with_openai(word_file)
+                # print('extracted section/contents ')
+                # progressbars[upload_id] = 40
 
-            # Headers
-            ws["A1"] = "Header"
-            ws["B1"] = "Subheader"
-            ws["C1"] = "Requirements"
-            ws["D1"] = "Page Limit"
-            for cell in ["A1", "B1", "C1", "D1"]:
-                apply_wrap_text(ws[cell])
+                # excel_path = add_excel_with_sections(
+                #     sections, excel_file=excel_path)
+                # print(excel_path)
+                # print('added contents in excel')
+                # progressbars[upload_id] = 60
 
-            row_num = 2
+                tables = extract_tables_from_docx(word_file)
+                print('extracted tables from wordfile')
+                progressbars[upload_id] = 80
 
-            for item in sections:
-                header = item.get("header", "")
-                subheader = item.get("subheader", "")
-                requirements = "\n".join(item.get("requirements", []))
-                page_limit = item.get("page_limit", "0")
+                excel_path = add_excel_with_tables(
+                    tables, excel_file=excel_path)
+                print(excel_path)
 
-                # Column A - Header
-                cell = ws[f"A{row_num}"]
-                cell.value = break_text_into_lines(header)
-                apply_wrap_text(cell)
+                print('added tables in excel ')
+                progressbars[upload_id] = 90
 
-                # Column B - Subheader
-                cell = ws[f"B{row_num}"]
-                cell.value = break_text_into_lines(subheader or "N/A")
-                apply_wrap_text(cell)
+            finally:
+                # Create an in-memory zip archive and add the processed Excel file to it
+                zip_output = io.BytesIO()
+                with zipfile.ZipFile(zip_output, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.write(excel_path, 'processed_result.xlsx')
 
-                # Column C - Requirements
-                cell = ws[f"C{row_num}"]
-                cell.value = break_text_into_lines(requirements)
-                apply_wrap_text(cell)
+                # Reset the pointer to the start of the buffer
+                zip_output.seek(0)
+                print('completed !')
+                progressbars[upload_id] = 100
 
-                # Column D - Page Limit
-                cell = ws[f"D{row_num}"]
-                cell.value = page_limit
-                apply_wrap_text(cell)
+                if excel_path and os.path.exists(excel_path):
+                    os.remove(excel_path)
 
-                row_num += 1
-
-            # print('files recieved !')
-            progressbars[upload_id] = 60
-            # Create an in-memory buffer to store the modified Excel file
-            excel_output = io.BytesIO()
-            wb.save(excel_output)
-            # Reset the pointer to the start of the buffer
-            excel_output.seek(0)
-
-            # Create an in-memory zip archive and add the processed Excel file to it
-            zip_output = io.BytesIO()
-            with zipfile.ZipFile(zip_output, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                zipf.writestr('processed_result.xlsx', excel_output.getvalue())
-
-            zip_output.seek(0)  # Reset the pointer to the start of the buffer
-
-            # print('completed !')
-            progressbars[upload_id] = 100
-            # Send the zip file back to the client
-            return send_file(
-                zip_output,
-                as_attachment=True,
-                download_name='processed_files.zip',
-                mimetype='application/zip'
-            )
+                # Send the zip file back to the client
+                return send_file(
+                    zip_output,
+                    as_attachment=True,
+                    download_name='processed_files.zip',
+                    mimetype='application/zip'
+                )
 
     except Exception as e:
         print(e)
@@ -124,11 +106,11 @@ def progress(upload_id):
         previous_percentage = progressbars.get(upload_id, 0)
         while True:
             percentage = progressbars.get(upload_id, 0)
-            if percentage != previous_percentage:
-                yield f"data: {percentage}\n\n"
-                previous_percentage = percentage
-            elif percentage == 100:
+            if percentage == 100:
                 yield f"data:{percentage}\n\n"
                 break
+            elif percentage != previous_percentage:
+                yield f"data: {percentage}\n\n"
+                previous_percentage = percentage
 
     return Response(generate(), mimetype='text/event-stream')

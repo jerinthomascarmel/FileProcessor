@@ -1,6 +1,6 @@
 
 import json
-import re
+import io
 import os
 import openai
 from docx import Document
@@ -8,6 +8,12 @@ from openpyxl import Workbook, load_workbook
 # from google.colab import files
 from openpyxl.styles import Alignment
 from dotenv import load_dotenv
+from .converter import Converter
+from openpyxl.styles import Font, PatternFill
+import re
+import tempfile
+
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -16,6 +22,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI()
 
 # Function: Read full document text
+
+
 def extract_content_with_openai(docx_file):
     doc = Document(docx_file)
     full_text = "\n".join([para.text.strip()
@@ -115,3 +123,141 @@ def break_text_into_lines(text, max_characters=50):
         lines.append(' '.join(current_line))
     return '\n'.join(lines)
 
+
+def add_excel_with_sections(sections, excel_file):
+    # Load the Excel file
+    wb = load_workbook(excel_file)
+    ws = wb.active
+
+    ws = wb.create_sheet(title="returnables")
+    # Headers
+    ws["A1"] = "Header"
+    ws["B1"] = "Subheader"
+    ws["C1"] = "Requirements"
+    ws["D1"] = "Page Limit"
+    for cell in ["A1", "B1", "C1", "D1"]:
+        apply_wrap_text(ws[cell])
+
+    row_num = 2
+
+    for item in sections:
+        header = item.get("header", "")
+        subheader = item.get("subheader", "")
+        requirements = "\n".join(item.get("requirements", []))
+        page_limit = item.get("page_limit", "0")
+
+        # Column A - Header
+        cell = ws[f"A{row_num}"]
+        cell.value = break_text_into_lines(header)
+        apply_wrap_text(cell)
+
+        # Column B - Subheader
+        cell = ws[f"B{row_num}"]
+        cell.value = break_text_into_lines(subheader or "N/A")
+        apply_wrap_text(cell)
+
+        # Column C - Requirements
+        cell = ws[f"C{row_num}"]
+        cell.value = break_text_into_lines(requirements)
+        apply_wrap_text(cell)
+
+        # Column D - Page Limit
+        cell = ws[f"D{row_num}"]
+        cell.value = page_limit
+        apply_wrap_text(cell)
+        row_num += 1
+
+    wb.save(excel_file)
+    return excel_file
+
+
+def extract_tables_from_docx(word_file):
+    tmp_path = None
+    word_file.seek(0)
+
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+            tmp.write(word_file.read())
+            tmp_path = tmp.name
+
+        converter = Converter()
+        json_format = converter.convert_docx_to_json(tmp_path)
+        docling_tables = json_format["tables"]
+
+        structured_tables = []
+        for idx, tbl in enumerate(docling_tables, start=1):
+            # 1) choose a heading
+            caps = tbl.get("captions", [])
+            if caps:
+                heading = caps[0] if isinstance(
+                    caps[0], str) else caps[0].get("text", "")
+            else:
+                heading = f"Table {idx}"
+
+            # 2) wrap each cell dict with just the bits we need
+            grid = tbl["data"]["grid"]
+            table = []
+            for row in grid:
+                wrapped_row = []
+                for cell in row:
+                    wrapped_row.append({
+                        "text":           cell.get("text", "").strip(),
+                        "column_header":  bool(cell.get("column_header", False)),
+                        "row_header":     bool(cell.get("row_header",    False)),
+                    })
+                table.append(wrapped_row)
+
+            structured_tables.append({
+                "heading": heading,
+                "table":   table
+            })
+
+        return structured_tables
+    finally:
+        # Clean up: Delete the temporary file
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def sanitize_sheet_title(title: str) -> str:
+    # Excel sheet titles: max 31 chars, cannot contain : \ / ? * [ ]
+    safe = re.sub(r'[:\\\/\?\*\[\]]', '_', title)
+    return safe[:31]
+
+
+def add_excel_with_tables(tables, excel_file):
+
+    # Load the Excel file
+    wb = load_workbook(excel_file)
+    ws = wb.active
+
+    header_font = Font(bold=True)
+
+    for tbl in tables:
+        title = sanitize_sheet_title(tbl["heading"])
+        ws = wb.create_sheet(title=title)
+
+        for r, row in enumerate(tbl["table"], start=1):
+            for c, cell in enumerate(row,   start=1):
+                # should print something like {'text': '...', ...}
+                text = cell["text"]
+                # write the TEXT only, not the whole dict
+                excel_cell = ws.cell(row=r, column=c, value=text)
+                if cell["column_header"] or cell["row_header"]:
+                    excel_cell.font = header_font
+                    excel_cell.fill = PatternFill("lightUp", fgColor="FFC400")
+                # Extend the width of the excel cell to fit the text fully
+                from openpyxl.utils import get_column_letter
+                ws.column_dimensions[get_column_letter(c)].width = max(
+                    len(str(text)) + 2, ws.column_dimensions[get_column_letter(c)].width)
+
+    # # Create an in-memory buffer to store the modified Excel file
+    # excel_output = io.BytesIO()
+    wb.save(excel_file)
+    # # Reset the pointer to the start of the buffer
+    # excel_output.seek(0)
+    return excel_file
+
+    # wb.save(output_path)
+    # print(f"✅ Excel file saved to: {output_path}")

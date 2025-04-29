@@ -361,6 +361,8 @@
         "new-upload-button-phase1"
       );
       const downloadA = document.getElementById("download-a-phase1");
+      const progressIndicator = document.getElementById("progress-indicator");
+      const progressText = document.getElementById("progress-text");
 
       let fileWord = null;
       let fileTemplate = null;
@@ -415,6 +417,7 @@
       });
 
       async function handleFile() {
+        console.log("handle file is called !");
         if (!fileWord || !fileTemplate) {
           alert("upload both files !");
           return;
@@ -431,15 +434,20 @@
 
         // Create a new FormData and append the compressed zip file
         const formData = new FormData();
-        const uploadId = uuidv4();
+        const uploadId = createUUID();
         formData.append("zip_file", zipFile, "files.zip");
         formData.append("upload_id", uploadId);
-
+        console.log("event source is called ");
         const eventSource = new EventSource("/progress/" + uploadId);
 
         eventSource.onmessage = function (event) {
           console.log("Progress Event:", event.data);
+          progressIndicator.style.width = `${event.data}%`;
+          progressText.innerText = `${event.data}%`;
         };
+
+
+        console.log("event source is streamed !");
 
         eventSource.onerror = function (err) {
           console.error("EventSource failed:", err);
@@ -492,6 +500,20 @@
       }
 
       function simulateProcessing() {}
+      function createUUID() {
+        let dt = new Date().getTime();
+
+        const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (dt + Math.random() * 16) % 16 | 0;
+            dt = Math.floor(dt / 16);
+            return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
+          }
+        );
+
+        return uuid;
+      }
     });
   </script>
 </section>

@@ -8,7 +8,7 @@ venv/
 ENV/
 env/
 .venv/
-
+myenv
 # Environment variables file
 .env
 
