@@ -2,7 +2,7 @@ from flask import request, jsonify, send_file, redirect, url_for, Response
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
-from ..openai_processing import extract_content_with_openai, add_excel_with_sections, extract_tables_from_docx, add_excel_with_tables
+from ..openai_processing import extract_content_with_openai, add_excel_with_sections, extract_tables_from_docx, add_excel_with_tables, extract_tables_from_docx_usingpydocx
 from flask_jwt_extended import verify_jwt_in_request
 import os
 import tempfile
@@ -53,20 +53,22 @@ def upload_phase1():
                     tmp.write(excel_file.read())
                     excel_path = tmp.name
 
-                # sections = extract_content_with_openai(word_file)
-                # print('extracted section/contents ')
-                # progressbars[upload_id] = 40
+                sections = extract_content_with_openai(word_file)
+                print('extracted section/contents ')
+                progressbars[upload_id] = 40
 
-                # excel_path = add_excel_with_sections(
-                #     sections, excel_file=excel_path)
-                # print(excel_path)
-                # print('added contents in excel')
-                # progressbars[upload_id] = 60
+                excel_path = add_excel_with_sections(
+                    sections, excel_file=excel_path)
+                print(excel_path)
+                print('added contents in excel')
+                progressbars[upload_id] = 60
 
-                tables = extract_tables_from_docx(word_file)
+                print("going to the table extraction function ....")
+                tables = extract_tables_from_docx_usingpydocx(word_file)
                 print('extracted tables from wordfile')
                 progressbars[upload_id] = 80
 
+                print("going to adding tables in excel sheet ....")
                 excel_path = add_excel_with_tables(
                     tables, excel_file=excel_path)
                 print(excel_path)

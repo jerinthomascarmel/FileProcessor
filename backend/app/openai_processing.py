@@ -171,6 +171,51 @@ def add_excel_with_sections(sections, excel_file):
     return excel_file
 
 
+def extract_tables_from_docx_usingpydocx(word_file):
+    tmp_path = None
+    word_file.seek(0)
+    print("are you here !")
+
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+            tmp.write(word_file.read())
+            tmp_path = tmp.name
+            print("you are inside the tempfile")
+
+        print('you are inside the try:')
+        doc = Document(tmp_path)
+        tables_data = []
+        print("number of tables in document is", len(doc.tables))
+
+        for index, table in enumerate(doc.tables, start=1):
+            table_content = []
+            for row in table.rows:
+                wrapped_row = []
+                for cell in row.cells:
+                    text = cell.text.strip()
+                    wrapped_row.append({
+                        "text": text,
+                        "column_header": bool(text),  # naïve header logic
+                        "row_header": bool(text),     # naïve header logic
+                    })
+                table_content.append(wrapped_row)
+
+            tables_data.append({
+                "heading": f"Table {index}",
+                "table": table_content
+            })
+
+        print("table data is:")
+        print(tables_data)
+        return tables_data
+
+    finally:
+        # Clean up: Delete the temporary file
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
 def extract_tables_from_docx(word_file):
     tmp_path = None
     word_file.seek(0)
