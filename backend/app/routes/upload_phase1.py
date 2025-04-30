@@ -2,7 +2,7 @@ from flask import request, jsonify, send_file, redirect, url_for, Response
 import io
 import zipfile
 from openpyxl.reader.excel import load_workbook
-from ..openai_processing import extract_content_with_openai, add_excel_with_sections, extract_tables_from_docx, add_excel_with_tables, extract_tables_from_docx_usingpydocx
+from ..openai_processing import extract_content_with_openai, add_excel_with_sections, add_excel_with_tables, extract_tables_from_docx_usingpydocx
 from flask_jwt_extended import verify_jwt_in_request
 import os
 import tempfile
@@ -54,7 +54,7 @@ def upload_phase1():
                     excel_path = tmp.name
 
                 sections = extract_content_with_openai(word_file)
-                print('extracted section/contents ')
+                print('extracted section/contents')
                 progressbars[upload_id] = 40
 
                 excel_path = add_excel_with_sections(
