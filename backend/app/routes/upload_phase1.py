@@ -1,12 +1,10 @@
-from flask import request, jsonify, send_file, redirect, url_for, Response
+from flask import request, jsonify, send_file, redirect, url_for
 import io
 import zipfile
-from openpyxl.reader.excel import load_workbook
 from ..openai_processing import extract_content_with_openai, add_excel_with_sections, add_excel_with_tables, extract_tables_from_docx_usingpydocx
 from flask_jwt_extended import verify_jwt_in_request
 import os
 import tempfile
-progressbars = {}
 
 
 def upload_phase1():
@@ -44,7 +42,6 @@ def upload_phase1():
                 return jsonify({'error': 'Both Word and Excel files are required inside the zip.'}), 400
 
             print('files recieved !')
-            progressbars[upload_id] = 10
 
             excel_path = None
             try:
@@ -55,18 +52,18 @@ def upload_phase1():
 
                 sections = extract_content_with_openai(word_file)
                 print('extracted section/contents')
-                progressbars[upload_id] = 40
+        
 
                 excel_path = add_excel_with_sections(
                     sections, excel_file=excel_path)
                 print(excel_path)
                 print('added contents in excel')
-                progressbars[upload_id] = 60
+
 
                 print("going to the table extraction function ....")
                 tables = extract_tables_from_docx_usingpydocx(word_file)
                 print('extracted tables from wordfile')
-                progressbars[upload_id] = 80
+       
 
                 print("going to adding tables in excel sheet ....")
                 excel_path = add_excel_with_tables(
@@ -74,7 +71,7 @@ def upload_phase1():
                 print(excel_path)
 
                 print('added tables in excel ')
-                progressbars[upload_id] = 90
+
 
             finally:
                 # Create an in-memory zip archive and add the processed Excel file to it
@@ -85,7 +82,7 @@ def upload_phase1():
                 # Reset the pointer to the start of the buffer
                 zip_output.seek(0)
                 print('completed !')
-                progressbars[upload_id] = 100
+
 
                 if excel_path and os.path.exists(excel_path):
                     os.remove(excel_path)
@@ -103,16 +100,4 @@ def upload_phase1():
         return jsonify({'error': f'An error occurred during processing: {str(e)}'}), 500
 
 
-def progress(upload_id):
-    def generate():
-        previous_percentage = progressbars.get(upload_id, 0)
-        while True:
-            percentage = progressbars.get(upload_id, 0)
-            if percentage == 100:
-                yield f"data:{percentage}\n\n"
-                break
-            elif percentage != previous_percentage:
-                yield f"data: {percentage}\n\n"
-                previous_percentage = percentage
 
-    return Response(generate(), mimetype='text/event-stream')
