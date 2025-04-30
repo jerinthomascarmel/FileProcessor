@@ -6,17 +6,14 @@ from .routes.upload_phase1 import upload_phase1, progress
 from .routes.home import home  # Import your home route
 from .routes.login import login  # Import your login route
 from .routes.logout import logout  # Import your logout route
-from dotenv import load_dotenv
-import os
-load_dotenv()
+
 
 
 def create_app():
 
     app = Flask(__name__)
 
-    port = int(os.environ.get('PORT', 4000))
-    app.run(host='0.0.0.0', port=port)
+
 
     CORS(app)  # Enable CORS for all routes
 
