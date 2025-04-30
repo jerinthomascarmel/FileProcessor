@@ -8,7 +8,6 @@ from openpyxl import Workbook, load_workbook
 # from google.colab import files
 from openpyxl.styles import Alignment
 from dotenv import load_dotenv
-from .converter import Converter
 from openpyxl.styles import Font, PatternFill
 import re
 import tempfile
@@ -216,53 +215,53 @@ def extract_tables_from_docx_usingpydocx(word_file):
             os.remove(tmp_path)
 
 
-def extract_tables_from_docx(word_file):
-    tmp_path = None
-    word_file.seek(0)
+# def extract_tables_from_docx(word_file):
+#     tmp_path = None
+#     word_file.seek(0)
 
-    try:
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
-            tmp.write(word_file.read())
-            tmp_path = tmp.name
+#     try:
+#         # Create a temporary file
+#         with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+#             tmp.write(word_file.read())
+#             tmp_path = tmp.name
 
-        converter = Converter()
-        json_format = converter.convert_docx_to_json(tmp_path)
-        docling_tables = json_format["tables"]
+#         converter = Converter()
+#         json_format = converter.convert_docx_to_json(tmp_path)
+#         _tables = json_format["tables"]
 
-        structured_tables = []
-        for idx, tbl in enumerate(docling_tables, start=1):
-            # 1) choose a heading
-            caps = tbl.get("captions", [])
-            if caps:
-                heading = caps[0] if isinstance(
-                    caps[0], str) else caps[0].get("text", "")
-            else:
-                heading = f"Table {idx}"
+#         structured_tables = []
+#         for idx, tbl in enumerate(docling_tables, start=1):
+#             # 1) choose a heading
+#             caps = tbl.get("captions", [])
+#             if caps:
+#                 heading = caps[0] if isinstance(
+#                     caps[0], str) else caps[0].get("text", "")
+#             else:
+#                 heading = f"Table {idx}"
 
-            # 2) wrap each cell dict with just the bits we need
-            grid = tbl["data"]["grid"]
-            table = []
-            for row in grid:
-                wrapped_row = []
-                for cell in row:
-                    wrapped_row.append({
-                        "text":           cell.get("text", "").strip(),
-                        "column_header":  bool(cell.get("column_header", False)),
-                        "row_header":     bool(cell.get("row_header",    False)),
-                    })
-                table.append(wrapped_row)
+#             # 2) wrap each cell dict with just the bits we need
+#             grid = tbl["data"]["grid"]
+#             table = []
+#             for row in grid:
+#                 wrapped_row = []
+#                 for cell in row:
+#                     wrapped_row.append({
+#                         "text":           cell.get("text", "").strip(),
+#                         "column_header":  bool(cell.get("column_header", False)),
+#                         "row_header":     bool(cell.get("row_header",    False)),
+#                     })
+#                 table.append(wrapped_row)
 
-            structured_tables.append({
-                "heading": heading,
-                "table":   table
-            })
+#             structured_tables.append({
+#                 "heading": heading,
+#                 "table":   table
+#             })
 
-        return structured_tables
-    finally:
-        # Clean up: Delete the temporary file
-        if tmp_path and os.path.exists(tmp_path):
-            os.remove(tmp_path)
+#         return structured_tables
+#     finally:
+#         # Clean up: Delete the temporary file
+#         if tmp_path and os.path.exists(tmp_path):
+#             os.remove(tmp_path)
 
 
 def sanitize_sheet_title(title: str) -> str:
