@@ -1,4 +1,6 @@
 
+from docx.text.paragraph import Paragraph
+from docx.table import Table
 import json
 import io
 import os
@@ -128,7 +130,6 @@ def add_excel_with_sections(sections, excel_file):
     wb = load_workbook(excel_file)
     ws = wb.active
 
-    ws = wb.create_sheet(title="returnables")
     # Headers
     ws["A1"] = "Header"
     ws["B1"] = "Subheader"
@@ -214,6 +215,83 @@ def extract_tables_from_docx_usingpydocx(word_file):
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
 
+
+def extract_tables_with_headings_and_context(word_file):
+    tmp_path = None
+    word_file.seek(0)
+    print("are you here !")
+
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+            tmp.write(word_file.read())
+            tmp_path = tmp.name
+            print("you are inside the tempfile")
+
+        print('you are inside the try:')
+        doc = Document(tmp_path)
+        tables_data = []
+
+        unknown_idx = 1
+        # Helper function to iterate through paragraphs and tables in order
+
+        def iter_block_items(parent):
+            for child in parent.element.body.iterchildren():
+                if child.tag.endswith('}p'):
+                    yield Paragraph(child, parent)
+                elif child.tag.endswith('}tbl'):
+                    yield Table(child, parent)
+
+        all_elements = list(iter_block_items(doc))
+        current_heading = None
+
+        for idx, element in enumerate(all_elements):
+            if isinstance(element, Paragraph):
+                style = element.style.name if element.style else ''
+                if style.startswith('Heading'):
+                    current_heading = element.text.strip()
+
+            elif isinstance(element, Table):
+                table_content = []
+                for row in element.rows:
+                    row_data = []
+                    for cell in row.cells:
+                        text = cell.text.strip()
+                        row_data.append({
+                            "text": text,
+                            "column_header": bool(text),
+                            "row_header": bool(text)
+                        })
+                    table_content.append(row_data)
+
+                # Capture up to 2 paragraphs before and after the table for context
+                before_context = []
+
+                # Look back for up to 2 paragraphs
+                i = idx - 1
+                while i >= 0 and len(before_context) < 4:
+                    prev_elem = all_elements[i]
+                    if isinstance(prev_elem, Paragraph):
+                        before_context.insert(0, prev_elem.text.strip())
+                    i -= 1
+
+                pred_heading = all_elements[idx-1].text.strip()
+                if (len(pred_heading) > 45 or len(pred_heading) == 0):
+                    curr_heading = f"Unknown {unknown_idx}"
+                    unknown_idx += 1
+                else:
+                    curr_heading = pred_heading
+
+                tables_data.append({
+                    "heading": curr_heading,
+                    "table": table_content,
+                    "before_context": before_context})
+
+        return tables_data
+    finally:
+        # Clean up: Delete the temporary file
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 # def extract_tables_from_docx(word_file):
 #     tmp_path = None
