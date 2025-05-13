@@ -1,7 +1,8 @@
 from flask import request, jsonify, send_file, redirect, url_for
 import io
 import zipfile
-from ..openai_processing import extract_content_with_openai, add_excel_with_sections, add_excel_with_tables, extract_tables_with_headings_and_context
+
+from .modules.phase1.openai_processing import extract_content_with_openai, add_excel_with_sections, add_excel_with_tables, extract_tables_with_headings_and_context
 from flask_jwt_extended import verify_jwt_in_request
 import os
 import tempfile

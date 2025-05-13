@@ -102,12 +102,12 @@
                 Document Structure
               </h3>
               <div>
-                <button
+                <!-- <button
                   id="download-all-button-phase2"
                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300 mr-2"
                 >
                   Download All
-                </button>
+                </button> -->
                 <button
                   id="restart-button-phase2"
                   class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-300"
@@ -142,7 +142,7 @@
               <!-- Document Structure Preview -->
               <div id="document-structure" class="divide-y">
                 <!-- Example Section 1 -->
-                <div
+                <!-- <div
                   class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
                 >
                   <div class="flex items-center">
@@ -167,119 +167,9 @@
                   >
                     Download
                   </button>
-                </div>
-
-                <!-- Example Section 2 -->
-                <div
-                  class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gray-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                    <span>2. Literature Review</span>
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Download
-                  </button>
-                </div>
-
-                <!-- Example Section 3 -->
-                <div
-                  class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gray-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                    <span>3. Methodology</span>
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Download
-                  </button>
-                </div>
-
-                <!-- Example Section 4 -->
-                <div
-                  class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gray-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                    <span>4. Results and Discussion</span>
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Download
-                  </button>
-                </div>
-
-                <!-- Example Section 5 -->
-                <div
-                  class="px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
-                >
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gray-500 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                      ></path>
-                    </svg>
-                    <span>5. Conclusion</span>
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Download
-                  </button>
-                </div>
+                </div> -->
+      
+              
               </div>
             </div>
           </div>
@@ -387,6 +277,11 @@
         const uploadDragover = document.getElementById(
           "upload-dragover-phase2"
         );
+        const documentStructure = document.getElementById(
+          "document-structure"
+        );
+    
+
         const uploadProcessing = document.getElementById(
           "upload-processing-phase2"
         );
@@ -412,6 +307,7 @@
           uploadArea.classList.add("bg-blue-100");
         });
 
+        
         uploadArea.addEventListener("dragleave", function (e) {
           e.preventDefault();
           uploadDefault.classList.remove("hidden");
@@ -420,10 +316,10 @@
           uploadArea.classList.remove("bg-blue-100");
         });
 
-        uploadArea.addEventListener("drop", function (e) {
+        uploadArea.addEventListener("drop",async function (e) {
           e.preventDefault();
           const files = e.dataTransfer.files;
-          handleFile(files[0]);
+          await handleFile(files[0]);
         });
 
         // Browse button functionality
@@ -431,9 +327,10 @@
           fileInput.click();
         });
 
-        fileInput.addEventListener("change", function () {
+        fileInput.addEventListener("change",async function () {
           if (fileInput.files.length > 0) {
-            handleFile(fileInput.files[0]);
+            console.log('change event is triggered !');
+            await handleFile(fileInput.files[0]);
           }
         });
 
@@ -448,71 +345,65 @@
           progressText.textContent = "0%";
         });
 
-        function handleFile(file) {
+        async function handleFile(file) {
           console.log("called handleFile !");
           if (file && file.name.endsWith(".docx")) {
+
             // Update UI for processing
             uploadDefault.classList.add("hidden");
             uploadDragover.classList.add("hidden");
             uploadProcessing.classList.remove("hidden");
             uploadArea.classList.remove("border-blue-500");
-
             // Set filename
             filename.textContent = file.name;
 
-            // Create FormData and append file
-            const formData = new FormData();
-            formData.append("zip_file", file);
+            //create a zip file 
+            const zip = new JSZip();
+            if (file) zip.file(file.name, file);
 
-            // Send request to upload endpoint with JWT token in headers
-            fetch("/upload-phase2", {
-              method: "POST",
-              body: formData,
-              credentials: "include",
-            })
-              .then((response) => {
-                // Check if the response was redirected
-                if (response.redirected) {
+            try {
+              // Generate the zip file
+              const zipFile = await zip.generateAsync({ type: "blob" });
+              // Create FormData and append file
+              const formData = new FormData();
+              formData.append("zip_file", zipFile);
+      
+              // Send request to upload endpoint with JWT token in headers
+              const response =await fetch("/upload-phase2", {
+                method: "POST",
+                body: formData,
+                credentials: "include",
+              })
+
+
+               if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+              }
+
+              if (response.redirected) {
                   console.log("Redirect detected to:", response.url);
                   window.location.href = response.url; // Redirect the browser
                   return; // Exit the function early
                 }
 
-                if (response.status === 400) {
-                  console.log(
-                    "Bad Request: The server could not understand the request."
-                  );
-                  throw new Error("Bad Request");
-                }
-                if (!response.ok) {
-                  console.log("response is not ok !");
-                  throw new Error("Network response was not ok");
-                }
-                console.log("response is ok !");
-                return response.blob();
-              })
-              .then((blob) => {
-                console.log("blob is created !");
-                // Create download link for processed file
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "processed_files.zip";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-
-                // Show success UI
-                uploadArea.classList.add("hidden");
-                resultsArea.classList.remove("hidden");
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                alert("An error occurred during upload");
-                uploadDefault.classList.remove("hidden");
-                uploadProcessing.classList.add("hidden");
+              const data = await response.json();
+              data.files.forEach(doc => { 
+                // const docUrl =downloadFile(doc.docxurl)
+                const docElement = createDocumentList(doc.filename, doc.docxurl);
+                documentStructure.appendChild(docElement);
               });
+
+              // Show success UI
+              uploadArea.classList.add("hidden");
+              resultsArea.classList.remove("hidden");
+
+            } catch (error) {
+              alert("An error occurred during upload");
+              uploadDefault.classList.remove("hidden");
+              uploadProcessing.classList.add("hidden");
+              console.error("Error during processing:", error);
+            }
+
           } else {
             console.log("file is not a docx file !");
             alert("Please upload a valid DOCX file.");
@@ -540,6 +431,78 @@
             }
           }, 600);
         }
+
+      function createDocumentList(filename, fileUrl) {
+        console.log('filename:', filename);
+        console.log('fileUrl:', fileUrl);
+        // Create the container div
+        const container = document.createElement('div');
+        container.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center';
+
+        // Create the left section with the icon and filename
+        const leftSection = document.createElement('div');
+        leftSection.className = 'flex items-center';
+
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        icon.setAttribute('class', 'h-5 w-5 text-gray-500 mr-2');
+        icon.setAttribute('fill', 'none');
+        icon.setAttribute('viewBox', '0 0 24 24');
+        icon.setAttribute('stroke', 'currentColor');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('d', 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z');
+
+        icon.appendChild(path);
+
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.textContent = filename;
+
+        leftSection.appendChild(icon);
+        leftSection.appendChild(fileNameSpan);
+
+        // Create the download button
+        const downloadButton = document.createElement('a');
+        downloadButton.className = 'text-blue-600 hover:text-blue-800 font-medium text-sm';
+        downloadButton.href = fileUrl;
+        downloadButton.download = filename;
+        downloadButton.textContent = 'Download';
+
+        // Assemble the container
+        container.appendChild(leftSection);
+        container.appendChild(downloadButton);
+
+        return container;
+      }
+
+
+      async function downloadFile(fileUrl) {
+        console.log('fileUrl:', fileUrl);
+        try {
+          const response = await fetch(fileUrl, {
+            mode: 'cors',
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          console.log('Blob URL:', blobUrl);
+
+          return blobUrl; 
+        } catch (error) {
+
+            console.error('Download failed:', error);
+            throw new Error('An error occurred while downloading the file.');
+        }
+      }
+
+
       });
     </script>
   </div>
